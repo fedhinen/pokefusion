@@ -1,0 +1,6 @@
+env:
+  - variable: CLOUDFLARE_ACCOUNT_ID
+    secret: CLOUDFLARE_ACCOUNT_ID
+
+  - variable: CLOUDFLARE_AUTH_TOKEN
+    secret: CLOUDFLARE_AUTH_TOKEN
