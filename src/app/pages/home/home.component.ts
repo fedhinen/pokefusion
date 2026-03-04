@@ -1,16 +1,28 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
+  PLATFORM_ID,
+} from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { forkJoin } from 'rxjs';
 
 import { PokemonService } from '../../services/pokemon.service';
 import { PolimerizationService } from '../../services/polimerization.service';
+import { FavoritesService } from '../../services/favorites.service';
 import { PokemonCardComponent } from '../../components/pokemon-card/pokemon-card.component';
 import { FusionResultComponent } from '../../components/fusion-result/fusion-result.component';
+import { FavoritesListComponent } from '../../components/favorites-list/favorites-list.component';
 import type { Pokemon } from '../../../types/Pokemon';
 import type { PokemonFusion } from '../../../types/Fusion';
+import type { SavedFusion } from '../../../types/Favorite';
 
 type SlotState = 'empty' | 'loading' | 'loaded' | 'error';
 type FusionState = 'idle' | 'loading' | 'done' | 'error';
 type ImageState = 'idle' | 'loading' | 'done' | 'error';
+type ViewMode = 'fusion' | 'favorite';
 
 interface PokemonSlot {
   state: SlotState;
@@ -20,12 +32,14 @@ interface PokemonSlot {
 @Component({
   selector: 'app-home',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PokemonCardComponent, FusionResultComponent],
+  imports: [PokemonCardComponent, FusionResultComponent, FavoritesListComponent],
   templateUrl: './home.component.html',
 })
 export class HomeComponent {
   private readonly pokemonService = inject(PokemonService);
   private readonly polimerizationService = inject(PolimerizationService);
+  private readonly favoritesService = inject(FavoritesService);
+  private readonly platformId = inject(PLATFORM_ID);
 
   readonly slots = signal<PokemonSlot[]>([
     { state: 'empty', pokemon: null },
@@ -33,14 +47,25 @@ export class HomeComponent {
     { state: 'empty', pokemon: null },
   ]);
 
-  readonly fusionState = signal<FusionState>('idle');
   readonly fusion = signal<PokemonFusion | null>(null);
+  readonly fusionState = signal<FusionState>('idle');
   readonly fusionError = signal<string | null>(null);
   readonly selectionError = signal<string | null>(null);
 
   readonly imageState = signal<ImageState>('idle');
   readonly imageUrl = signal<string | null>(null);
+  readonly imageBlob = signal<Blob | null>(null);
   readonly imageError = signal<string | null>(null);
+
+  readonly isFavorite = signal<boolean>(false);
+  readonly isSavingFavorite = signal<boolean>(false);
+  readonly isDeletingFavorite = signal<boolean>(false);
+  readonly currentFavoriteId = signal<string | null>(null);
+
+  readonly viewMode = signal<ViewMode>('fusion');
+  readonly selectedFavorite = signal<SavedFusion | null>(null);
+
+  readonly favoritesList = signal<SavedFusion[]>([]);
 
   readonly allLoaded = computed(() => this.slots().every((s) => s.state === 'loaded'));
   readonly anyLoading = computed(() => this.slots().some((s) => s.state === 'loading'));
@@ -64,6 +89,15 @@ export class HomeComponent {
     if (this.allLoaded()) return 'Tres Pokémon cargados. Puedes fusionarlos.';
     return '';
   });
+
+  constructor() {
+    if (isPlatformBrowser(this.platformId)) {
+      this.favoritesService.listFavorites().subscribe({
+        next: (list) => this.favoritesList.set(list),
+        error: () => {},
+      });
+    }
+  }
 
   selectRandom(): void {
     this.selectionError.set(null);
@@ -116,6 +150,8 @@ export class HomeComponent {
     this.fusionState.set('loading');
     this.fusionError.set(null);
     this.resetImage();
+    this.isFavorite.set(false);
+    this.currentFavoriteId.set(null);
 
     this.polimerizationService.fuse(pokemons).subscribe({
       next: (result) => {
@@ -139,16 +175,17 @@ export class HomeComponent {
     this.imageState.set('loading');
     this.imageError.set(null);
 
-    // Liberar URL anterior para evitar memory leaks
     const prev = this.imageUrl();
     if (prev) {
       URL.revokeObjectURL(prev);
       this.imageUrl.set(null);
     }
+    this.imageBlob.set(null);
 
     this.polimerizationService.generateImage(fusion).subscribe({
       next: (blob) => {
         const url = URL.createObjectURL(blob);
+        this.imageBlob.set(blob);
         this.imageUrl.set(url);
         this.imageState.set('done');
       },
@@ -160,10 +197,79 @@ export class HomeComponent {
     });
   }
 
+  toggleFavorite(): void {
+    if (!this.isFavorite()) {
+      const fusion = this.fusion();
+      const blob = this.imageBlob();
+      if (!fusion || !blob) return;
+
+      this.isSavingFavorite.set(true);
+      this.favoritesService.saveFavorite(fusion, blob).subscribe({
+        next: (saved) => {
+          this.isFavorite.set(true);
+          this.currentFavoriteId.set(saved.id);
+          this.isSavingFavorite.set(false);
+        },
+        error: (err: unknown) => {
+          console.error('[FavoritesService] saveFavorite error:', err);
+          this.isSavingFavorite.set(false);
+        },
+      });
+    } else {
+      const id = this.currentFavoriteId();
+      if (!id) return;
+      if (!confirm('¿Eliminar esta fusión de tus favoritos?')) return;
+
+      this.isDeletingFavorite.set(true);
+      this.favoritesService.deleteFavorite(id).subscribe({
+        next: () => {
+          this.isFavorite.set(false);
+          this.currentFavoriteId.set(null);
+          this.isDeletingFavorite.set(false);
+        },
+        error: (err: unknown) => {
+          console.error('[FavoritesService] deleteFavorite error:', err);
+          this.isDeletingFavorite.set(false);
+        },
+      });
+    }
+  }
+
+  toggleFavoriteFromView(): void {
+    const fav = this.selectedFavorite();
+    if (!fav) return;
+    if (!confirm('¿Eliminar esta fusión de tus favoritos?')) return;
+
+    this.isDeletingFavorite.set(true);
+    this.favoritesService.deleteFavorite(fav.id).subscribe({
+      next: () => {
+        this.isDeletingFavorite.set(false);
+        this.selectedFavorite.set(null);
+        this.viewMode.set('fusion');
+      },
+      error: (err: unknown) => {
+        console.error('[FavoritesService] deleteFavorite error:', err);
+        this.isDeletingFavorite.set(false);
+      },
+    });
+  }
+
+  selectFavorite(fav: SavedFusion): void {
+    this.selectedFavorite.set(fav);
+    this.viewMode.set('favorite');
+  }
+
+  startNewFusion(): void {
+    this.selectedFavorite.set(null);
+    this.viewMode.set('fusion');
+  }
+
   private resetFusion(): void {
     this.fusionState.set('idle');
     this.fusion.set(null);
     this.fusionError.set(null);
+    this.isFavorite.set(false);
+    this.currentFavoriteId.set(null);
     this.resetImage();
   }
 
@@ -173,6 +279,7 @@ export class HomeComponent {
       URL.revokeObjectURL(prev);
     }
     this.imageUrl.set(null);
+    this.imageBlob.set(null);
     this.imageState.set('idle');
     this.imageError.set(null);
   }
