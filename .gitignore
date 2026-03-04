@@ -44,4 +44,3 @@ __screenshots__/
 Thumbs.db
 
 .env
-firebase.config.ts
