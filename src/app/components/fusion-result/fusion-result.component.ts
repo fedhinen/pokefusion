@@ -1,7 +1,10 @@
-import { ChangeDetectionStrategy, Component, input, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output, computed } from '@angular/core';
 import type { PokemonFusion } from '../../../types/Fusion';
 
 type ImageState = 'idle' | 'loading' | 'done' | 'error';
+
+/** Accepts both a full PokemonFusion and a saved fusion (moves excluded) */
+type FusionInput = Omit<PokemonFusion, 'moves'> & { moves?: PokemonFusion['moves'] };
 
 @Component({
   selector: 'app-fusion-result',
@@ -9,10 +12,19 @@ type ImageState = 'idle' | 'loading' | 'done' | 'error';
   templateUrl: './fusion-result.component.html',
 })
 export class FusionResultComponent {
-  readonly fusion = input.required<PokemonFusion>();
+  readonly fusion = input.required<FusionInput>();
   readonly imageState = input<ImageState>('idle');
   readonly imageUrl = input<string | null>(null);
   readonly imageError = input<string | null>(null);
+  readonly isFavorite = input<boolean>(false);
+  readonly savingFavorite = input<boolean>(false);
+
+  readonly favoriteToggled = output<void>();
+
+  readonly starAriaLabel = computed(() => {
+    if (this.savingFavorite()) return 'Guardando favorito...';
+    return this.isFavorite() ? 'Quitar de favoritos' : 'Agregar a favoritos';
+  });
 
   readonly imageAriaLabel = computed(() => {
     const s = this.imageState();
