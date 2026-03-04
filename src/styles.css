@@ -1,3 +1,337 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+
+/* ─── 16-bit / Pokémon theme ─── */
+:root {
+  --pixel-border: 4px solid;
+  --color-bg: #1a1c2c;
+  --color-surface: #0f3460;
+  --color-surface-2: #16213e;
+  --color-card-bg: #1a1c2c;
+  --color-accent: #f7c948;
+  --color-accent-hover: #ffe066;
+  --color-red: #e63946;
+  --color-red-hover: #ff6b6b;
+  --color-green: #2dc653;
+  --color-green-hover: #3ddc68;
+  --color-text-primary: #f5f5f5;
+  --color-text-muted: #a8b2d8;
+  --color-type-normal: #9a9a7e;
+  --color-type-fire: #f08030;
+  --color-type-water: #6890f0;
+  --color-type-electric: #f8d030;
+  --color-type-grass: #78c850;
+  --color-type-ice: #98d8d8;
+  --color-type-fighting: #c03028;
+  --color-type-poison: #a040a0;
+  --color-type-ground: #e0c068;
+  --color-type-flying: #a890f0;
+  --color-type-psychic: #f85888;
+  --color-type-bug: #a8b820;
+  --color-type-rock: #b8a038;
+  --color-type-ghost: #705898;
+  --color-type-dragon: #7038f8;
+  --color-type-dark: #705848;
+  --color-type-steel: #b8b8d0;
+  --color-type-fairy: #ee99ac;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 14px;
+  line-height: 1.8;
+  image-rendering: pixelated;
+}
+
+/* Pixel-art button base */
+.btn-pixel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.55rem;
+  line-height: 1.4;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  position: relative;
+  transition:
+    transform 0.08s,
+    filter 0.08s;
+  image-rendering: pixelated;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-pixel:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+.btn-pixel:active:not(:disabled) {
+  transform: translateY(2px);
+}
+
+.btn-pixel:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(0.4);
+}
+
+/* Yellow / primary */
+.btn-primary {
+  background-color: var(--color-accent);
+  color: #1a1c2c;
+  box-shadow:
+    0 4px 0 #b8942a,
+    4px 4px 0 #1a1c2c;
+}
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--color-accent-hover);
+  filter: brightness(1.05);
+}
+.btn-primary:active:not(:disabled) {
+  box-shadow:
+    0 2px 0 #b8942a,
+    2px 2px 0 #1a1c2c;
+}
+
+/* Red */
+.btn-danger {
+  background-color: var(--color-red);
+  color: #ffffff;
+  box-shadow:
+    0 4px 0 #8b1c23,
+    4px 4px 0 #1a1c2c;
+}
+.btn-danger:hover:not(:disabled) {
+  background-color: var(--color-red-hover);
+}
+.btn-danger:active:not(:disabled) {
+  box-shadow:
+    0 2px 0 #8b1c23,
+    2px 2px 0 #1a1c2c;
+}
+
+/* Green */
+.btn-success {
+  background-color: var(--color-green);
+  color: #1a1c2c;
+  box-shadow:
+    0 4px 0 #1a7a32,
+    4px 4px 0 #1a1c2c;
+}
+.btn-success:hover:not(:disabled) {
+  background-color: var(--color-green-hover);
+}
+.btn-success:active:not(:disabled) {
+  box-shadow:
+    0 2px 0 #1a7a32,
+    2px 2px 0 #1a1c2c;
+}
+
+/* Blue */
+.btn-secondary {
+  background-color: var(--color-surface);
+  color: var(--color-accent);
+  box-shadow:
+    0 4px 0 #081828,
+    4px 4px 0 #1a1c2c;
+  border: 2px solid var(--color-accent);
+}
+.btn-secondary:hover:not(:disabled) {
+  background-color: #1a3a5c;
+}
+.btn-secondary:active:not(:disabled) {
+  box-shadow:
+    0 2px 0 #081828,
+    2px 2px 0 #1a1c2c;
+}
+
+/* Pixel card */
+.pixel-card {
+  background-color: var(--color-surface-2);
+  border: 4px solid var(--color-accent);
+  box-shadow:
+    4px 4px 0 #000,
+    inset 0 0 0 2px rgba(248, 209, 48, 0.15);
+  position: relative;
+}
+
+/* Stat bar */
+.stat-bar-track {
+  background-color: #0a0f1e;
+  border: 2px solid #2a2f4e;
+  height: 10px;
+  overflow: hidden;
+}
+
+.stat-bar-fill {
+  height: 100%;
+  transition: width 0.6s ease;
+}
+
+/* Scanline overlay for 16-bit feel */
+.scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.15) 2px,
+    rgba(0, 0, 0, 0.15) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Type badge colors */
+.type-normal {
+  background-color: var(--color-type-normal);
+}
+.type-fire {
+  background-color: var(--color-type-fire);
+}
+.type-water {
+  background-color: var(--color-type-water);
+}
+.type-electric {
+  background-color: var(--color-type-electric);
+  color: #1a1c2c;
+}
+.type-grass {
+  background-color: var(--color-type-grass);
+}
+.type-ice {
+  background-color: var(--color-type-ice);
+  color: #1a1c2c;
+}
+.type-fighting {
+  background-color: var(--color-type-fighting);
+}
+.type-poison {
+  background-color: var(--color-type-poison);
+}
+.type-ground {
+  background-color: var(--color-type-ground);
+  color: #1a1c2c;
+}
+.type-flying {
+  background-color: var(--color-type-flying);
+}
+.type-psychic {
+  background-color: var(--color-type-psychic);
+}
+.type-bug {
+  background-color: var(--color-type-bug);
+}
+.type-rock {
+  background-color: var(--color-type-rock);
+}
+.type-ghost {
+  background-color: var(--color-type-ghost);
+}
+.type-dragon {
+  background-color: var(--color-type-dragon);
+}
+.type-dark {
+  background-color: var(--color-type-dark);
+}
+.type-steel {
+  background-color: var(--color-type-steel);
+  color: #1a1c2c;
+}
+.type-fairy {
+  background-color: var(--color-type-fairy);
+  color: #1a1c2c;
+}
+
+/* Pokeball spinner */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.pokeball-spin {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 4px solid var(--color-accent);
+  border-top-color: transparent;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+/* Pixel blink cursor */
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.blink {
+  animation: blink 1s step-end infinite;
+}
+
+/* Glow pulse */
+@keyframes glow-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 8px var(--color-accent),
+      4px 4px 0 #000;
+  }
+  50% {
+    box-shadow:
+      0 0 20px var(--color-accent),
+      0 0 40px rgba(248, 201, 72, 0.3),
+      4px 4px 0 #000;
+  }
+}
+
+.glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* Slide-in fusion panel */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-up {
+  animation: slide-up 0.4s ease-out forwards;
+}
