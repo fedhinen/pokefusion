@@ -6,22 +6,22 @@ env:
     secret: CLOUDFLARE_AUTH_TOKEN
 
   - variable: FIREBASE_API_KEY
-    secret: FIRE_API_KEY
+    secret: FIREBASE_API_KEY
 
   - variable: FIREBASE_AUTH_DOMAIN
-    secret: FIRE_AUTH_DOMAIN
+    secret: FIREBASE_AUTH_DOMAIN
 
   - variable: FIREBASE_PROJECT_ID
-    secret: FIRE_PROJECT_ID
+    secret: FIREBASE_PROJECT_ID
 
   - variable: FIREBASE_STORAGE_BUCKET
-    secret: FIRE_STORAGE_BUCKET
+    secret: FIREBASE_STORAGE_BUCKET
 
   - variable: FIREBASE_MESSAGING_SENDER_ID
-    secret: FIRE_MESSAGING_SENDER_ID
+    secret: FIREBASE_MESSAGING_SENDER_ID
 
   - variable: FIREBASE_APP_ID
-    secret: FIRE_APP_ID
+    secret: FIREBASE_APP_ID
 
   - variable: FIREBASE_MEASUREMENT_ID
-    secret: FIRE_MEASUREMENT_ID
+    secret: FIREBASE_MEASUREMENT_ID
