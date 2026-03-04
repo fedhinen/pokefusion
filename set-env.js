@@ -24,4 +24,3 @@ export const firebaseApp: FirebaseApp = initializeApp(firebaseConfig);
 `;
 
 fs.writeFileSync(targetPath, envConfigFile);
-console.log('✅ Archivo firebase.config.ts generado y limpiado con éxito.');
