@@ -1,0 +1,57 @@
+<aside class="flex flex-col h-full border-r-4 border-[var(--color-accent)] bg-[var(--color-surface-2)] min-w-0"
+    aria-label="Favoritos guardados">
+    <div class="px-3 py-3 border-b-2 border-[rgba(248,201,72,0.3)] shrink-0">
+        <p class="text-[0.4rem] text-[var(--color-accent)] uppercase tracking-widest text-center leading-loose">
+            ★ Favoritos
+        </p>
+    </div>
+
+    <div class="flex-1 overflow-y-auto">
+        @if (favorites().length === 0) {
+        <div class="flex flex-col items-center justify-center gap-2 p-4 opacity-40 h-full">
+            <span class="text-2xl" aria-hidden="true">&#9734;</span>
+            <p class="text-[0.35rem] text-[var(--color-text-muted)] text-center leading-loose uppercase">
+                Sin favoritos
+            </p>
+        </div>
+        }
+
+        @if (favorites().length > 0) {
+        <ul role="list" class="flex flex-col gap-0" aria-label="Lista de fusiones favoritas">
+            @for (fav of favorites(); track fav.id) {
+            <li role="listitem">
+                <button (click)="selected.emit(fav)"
+                    class="w-full text-left px-3 py-3 flex flex-col gap-1 transition-colors border-b border-[rgba(248,201,72,0.15)] focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-accent)]"
+                    [class.bg-[rgba(248,201,72,0.12)]]="selectedId() === fav.id"
+                    [class.border-l-4]="selectedId() === fav.id"
+                    [class.border-l-[var(--color-accent)]]="selectedId() === fav.id"
+                    [attr.aria-current]="selectedId() === fav.id ? 'true' : null"
+                    [attr.aria-label]="'Ver fusión ' + fav.fusion.name">
+                    <div class="flex items-center gap-2">
+                        <div
+                            class="w-8 h-8 shrink-0 overflow-hidden border border-[rgba(248,201,72,0.3)] bg-[var(--color-bg)]">
+                            <img [src]="fav.imageUrl" [alt]="'Sprite de ' + fav.fusion.name" width="32" height="32"
+                                class="w-full h-full object-contain" style="image-rendering: pixelated;" />
+                        </div>
+                        <p class="text-[0.4rem] text-[var(--color-accent)] uppercase leading-snug break-all">
+                            {{ fav.fusion.name }}
+                        </p>
+                    </div>
+
+                    <div class="flex flex-wrap gap-1 pl-10">
+                        @for (t of fav.fusion.types; track t.slot) {
+                        <span class="type-{{
+                          t.name
+                        }} text-white text-[0.3rem] px-1 py-0.5 uppercase font-bold"
+                            style="font-family: 'Press Start 2P', monospace; border: 1px solid rgba(0,0,0,0.3);">
+                            {{ t.name }}
+                        </span>
+                        }
+                    </div>
+                </button>
+            </li>
+            }
+        </ul>
+        }
+    </div>
+</aside>
